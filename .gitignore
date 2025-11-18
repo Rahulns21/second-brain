@@ -1,0 +1,41 @@
+# Node dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor folders
+.vscode/
+.idea/
+
+# Testing / coverage
+coverage/
+.tmp/
+temp/
+
+# PM2
+.pids
+*.pid
+*.seed
+*.pid.lock
+
+# Misc
+*.tgz
