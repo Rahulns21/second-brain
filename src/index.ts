@@ -93,8 +93,35 @@ app.get("/api/v1/content", userMiddleware, async (req, res) => {
     });
 });
 
-app.delete("api/v1/content", (req, res) => {
+app.delete("/api/v1/content", userMiddleware, async (req, res) => {
+    const contentId = req.body.contentId;
 
+    if (!req.userId) {
+        return res.status(401).json({
+            message: "Unauthorized"
+        });
+    }
+
+    if (!contentId) {
+        return res.status(401).json({
+            message: "ContentId is required"
+        })
+    }
+
+    const result = await ContentModel.deleteOne({
+        _id: new Types.ObjectId(contentId),
+        userId: new Types.ObjectId(req.userId)
+    });
+
+    if (result.deletedCount === 0) {
+        return res.status(404).json({
+            message: "Content not found"
+        });
+    }
+
+    res.json({
+        message: "Content deleted successfully"
+    });
 });
 
 app.post("/api/v1/brain/share", (req, res) => {
