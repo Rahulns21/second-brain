@@ -5,6 +5,7 @@ import { ContentModel, UserModel } from "./db/db";
 import { config } from "./config/config";
 import jwt from "jsonwebtoken";
 import { userMiddleware } from "./middleware/middleware";
+import { Types } from "mongoose";
 
 const app = express();
 app.use(express.json());
@@ -74,8 +75,22 @@ app.post("/api/v1/content", userMiddleware, async (req, res) => {
     }); 
 });
 
-app.get("/api/v1/content", (req, res) => {
+app.get("/api/v1/content", userMiddleware, async (req, res) => {
+    const userId = req.userId;
 
+    if (!req.userId) {
+        return res.status(401).json({
+            message: "Unauthorized"
+        });
+    }
+
+    const content = await ContentModel.find({
+        userId: new Types.ObjectId(userId)
+    }).populate("userId", "username");
+
+    return res.json({
+        content
+    });
 });
 
 app.delete("api/v1/content", (req, res) => {
