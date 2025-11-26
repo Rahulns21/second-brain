@@ -1,9 +1,10 @@
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
-import { UserModel } from "./db/db";
+import { ContentModel, UserModel } from "./db/db";
 import { config } from "./config/config";
 import jwt from "jsonwebtoken";
+import { userMiddleware } from "./middleware/middleware";
 
 const app = express();
 app.use(express.json());
@@ -52,11 +53,26 @@ app.post("/api/v1/signin", async (req, res) => {
     }
 });
 
-app.post("/api/v1/content",  (req, res) => {
-    const link = req.body.link;
-    const type = req.body.type;
+app.post("/api/v1/content", userMiddleware, async (req, res) => {
+    const { link, title } = req.body;
 
-})
+    if (!req.userId) {
+        return res.status(401).json({
+            message: "Unauthorized"
+        });
+    }
+
+    await ContentModel.create({
+        link,
+        title, 
+        userId: req.userId,
+        tags: []
+    });
+
+    return res.json({
+        message: "Content added."
+    }); 
+});
 
 app.get("/api/v1/content", (req, res) => {
 

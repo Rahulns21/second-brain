@@ -1,29 +1,37 @@
-import {Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import { NextFunction, Request, Response } from "express";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { config } from "../config/config";
 
-interface JwtPayloadWithId extends jwt.JwtPayload {
+interface MyJwtPayload extends JwtPayload {
     id: string;
 }
 
-export const userMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization as string;
-    const decoded = jwt.verify(authHeader, config.JWT_SECRET) as JwtPayloadWithId;
+export function userMiddleware(req: Request, res: Response, next: NextFunction) {
+    const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-        res.status(401).json({
+        return res.status(401).json({
             message: "No authorization header"
         });
     }
 
     const token = authHeader.split(" ")[1];
 
+    if (!token) {
+        return res.status(401).json({
+            message: "Invalid token format"
+        });
+    }
+
+    const decoded = jwt.verify(token, config.JWT_SECRET) as MyJwtPayload;
+
     if (decoded) {
         req.userId = decoded.id;
         next();
     } else {
-        res.status(403).json({
-            message: "You are not logged in"
+        res.status(411).json({
+            message: "User not logged in"
         });
     }
+
 }
