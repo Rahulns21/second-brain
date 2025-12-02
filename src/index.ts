@@ -12,7 +12,7 @@ import bcrypt from "bcrypt";
 const app = express();
 app.use(express.json());
 
-app.post("api/v1/signup", async (req, res) => {
+app.post("/api/v1/signup", async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
@@ -73,22 +73,38 @@ app.post("/api/v1/signin", async (req, res) => {
         return;
     }
 
-    const existingUser = await UserModel.findOne({
-        username,
-        password
-    });
+    try {
+        const user = await UserModel.findOne({
+            username,
+        });
 
-    if (existingUser) {
+        if (!user) {
+            return res.status(401).json({
+                error: "Invalid credentials!"
+            });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password as string);
+
+        if (!isMatch) {
+            return res.status(401).json({
+                error: "Invalid credentials!"
+            });
+        }
+
         const token = jwt.sign({
-            id: existingUser._id
+            id: user._id
         }, config.JWT_SECRET);
 
-        res.json({
-            token
+        return res.status(200).json({
+            token: token
         });
-    } else {
-        res.status(401).json({
-            error: "Invalid credentials"
+
+    } catch(err) {
+        console.log(`Signin error: ${err}`);
+        return res.status(500).json({
+            error: "Internal server error",
+            message: "Something went wrong during signin"
         });
     }
 });
@@ -207,7 +223,7 @@ app.post("/api/v1/brain/share", userMiddleware, async (req, res) => {
                 return res.status(409).json({
                     success: false,
                     error: "Couldn't create link, since you already have an existing one",
-                    link: `/share/${existingLink.hash}`
+                    link: `http://localhost:3000/api/v1/brain/${existingLink.hash}`
                 });
             }
 
@@ -219,7 +235,7 @@ app.post("/api/v1/brain/share", userMiddleware, async (req, res) => {
             });
 
             res.status(200).json({
-                message: `http://localhost:3000/share/${hash}`
+                message: `http://localhost:3000/api/v1/brain/${hash}`
             });
         } else {
             const deletion = await LinkModel.deleteOne({
@@ -258,8 +274,6 @@ app.get("/api/v1/brain/:shareLink", async (req, res) => {
         const content = await ContentModel.find({
             userId: new Types.ObjectId(link.userId)
         });
-
-        console.log(link);
 
         const user = await UserModel.findOne({
             _id: link.userId
