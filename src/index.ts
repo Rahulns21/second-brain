@@ -8,9 +8,11 @@ import { userMiddleware } from "./middleware/middleware";
 import { Types } from "mongoose";
 import { random } from "./utils/utils";
 import bcrypt from "bcrypt";
+import cors from "cors";
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 app.post("/api/v1/signup", async (req, res) => {
     const { username, password } = req.body;
