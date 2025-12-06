@@ -112,9 +112,9 @@ app.post("/api/v1/signin", async (req, res) => {
 });
 
 app.post("/api/v1/content", userMiddleware, async (req, res) => {
-    const { link, title } = req.body;
+    const { link, title, type } = req.body;
 
-    if (!link || !title) {
+    if (!link || !title || !type) {
         return res.status(400).json({
             error: "Missing fields required",
             message: "Link and title fields are required"
@@ -131,6 +131,7 @@ app.post("/api/v1/content", userMiddleware, async (req, res) => {
         await ContentModel.create({
             link,
             title,
+            type,
             userId: req.userId,
             tags: []
         });
