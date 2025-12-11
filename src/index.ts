@@ -226,7 +226,7 @@ app.post("/api/v1/brain/share", userMiddleware, async (req, res) => {
                 return res.status(409).json({
                     success: false,
                     error: "Couldn't create link, since you already have an existing one",
-                    link: `http://localhost:3000/api/v1/brain/${existingLink.hash}`
+                    link: `http://localhost:5173/brain/${existingLink.hash}`
                 });
             }
 
@@ -238,7 +238,7 @@ app.post("/api/v1/brain/share", userMiddleware, async (req, res) => {
             });
 
             res.status(200).json({
-                message: `http://localhost:3000/api/v1/brain/${hash}`
+                message: `http://localhost:5173/brain/${hash}`
             });
         } else {
             const deletion = await LinkModel.deleteOne({
